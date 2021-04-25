@@ -14,8 +14,11 @@ from pyspark.sql import functions as F
 
 
 def main(spark, netID):
-	print(spark.conf.get('spark.executor.memory'))
-	print(spark.conf.get('spark.driver.memory'))
+	try:
+		print(spark.conf.get('spark.executor.memory'))
+		print(spark.conf.get('spark.driver.memory'))
+	except:
+		pass
 
 	# specify in and out paths
 	inpath = 'hdfs:/user/bm106/pub/MSD/'
@@ -44,7 +47,7 @@ if __name__ == "__main__":
 	# spark.sparkContext.stop()
 
 	# Create the spark session object
-	spark = SparkSession.builder.appName('final_project_subsample').getOrCreate()
+	spark = SparkSession.builder.appName('subsample').getOrCreate()
 
 	# Get user netID from the command line
 	netID = getpass.getuser()
