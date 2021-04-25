@@ -14,7 +14,9 @@ from pyspark.sql import functions as F
 
 
 def main(spark, netID):
-	print(spark.sparkContext.getConf().getAll())
+	print(spark.conf.get('spark.executor.memory'))
+	print(spark.conf.get('spark.driver.memory'))
+
 	# specify in and out paths
 	inpath = 'hdfs:/user/bm106/pub/MSD/'
 	outpath = f'hdfs:/user/{netID}/final_project/subsample/'
