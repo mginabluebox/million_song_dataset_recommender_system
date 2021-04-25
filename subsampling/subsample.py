@@ -14,6 +14,7 @@ from pyspark.sql import functions as F
 
 
 def main(spark, netID):
+	print(spark.sparkContext.getConf().getAll())
 	# specify in and out paths
 	inpath = 'hdfs:/user/bm106/pub/MSD/'
 	outpath = f'hdfs:/user/{netID}/final_project/subsample/'
@@ -36,20 +37,18 @@ def main(spark, netID):
 # Only enter this block if we're in main
 if __name__ == "__main__":
 	# change default spark context config
-	conf = [('spark.executor.memory', '10g'), ('spark.driver.memory', '10g')]
-	config = spark.sparkContext._conf.setAll(conf)
-	spark.sparkContext.stop()
+	# conf = [('spark.executor.memory', '10g'), ('spark.driver.memory', '10g')]
+	# config = spark.sparkContext._conf.setAll(conf)
+	# spark.sparkContext.stop()
 
-    # Create the spark session object
-    spark = SparkSession.builder \
-    		.appName('final_project_subsample') \
-    		.config(conf=config) \
-    		.getOrCreate()
-    print('Printing configuration: ')
-    print(spark.sparkContext._conf.getAll())
+	# Create the spark session object
+	spark = SparkSession.builder \
+			.appName('final_project_subsample') \
+			# .config(conf=config) \
+			.getOrCreate()
 
-    # Get user netID from the command line
-    netID = getpass.getuser()
+	# Get user netID from the command line
+	netID = getpass.getuser()
 
-    # Call our main routine
-    main(spark, netID)
+	# Call our main routine
+	main(spark, netID)
