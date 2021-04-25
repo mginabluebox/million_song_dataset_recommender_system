@@ -42,10 +42,7 @@ if __name__ == "__main__":
 	# spark.sparkContext.stop()
 
 	# Create the spark session object
-	spark = SparkSession.builder \
-			.appName('final_project_subsample') \
-			# .config(conf=config) \
-			.getOrCreate()
+	spark = SparkSession.builder.appName('final_project_subsample').getOrCreate()
 
 	# Get user netID from the command line
 	netID = getpass.getuser()
