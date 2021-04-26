@@ -25,7 +25,7 @@ def main(spark, netID):
 	outpath = f'hdfs:/user/{netID}/final_project/subsample/'
 
 	# read training file
-	original = spark.read.parquet(inpath + 'cf_train.parquet')
+	original = spark.read.parquet(inpath + 'cf_train_new.parquet')
 
 	# subsample 1%, 5%, 25% of the data
 	for size, fraction in zip(['tiny','small','medium'], [0.01,0.05,0.25]):
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 	# spark.sparkContext.stop()
 
 	# Create the spark session object
-	spark = SparkSession.builder.appName('subsample').getOrCreate()
+	spark = SparkSession.builder.appName('subsample').config('spark.blacklist.enabled',False).getOrCreate()
 
 	# Get user netID from the command line
 	netID = getpass.getuser()
