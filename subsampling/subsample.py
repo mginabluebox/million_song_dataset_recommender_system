@@ -14,12 +14,12 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
-def main(spark, netID, fraction):
-	try:
-		print(spark.conf.get('spark.executor.memory'))
-		print(spark.conf.get('spark.driver.memory'))
-	except:
-		pass
+def main(spark, netID):
+	# try:
+	# 	print(spark.conf.get('spark.executor.memory'))
+	# 	print(spark.conf.get('spark.driver.memory'))
+	# except:
+	# 	pass
 
 	# specify in and out paths
 	inpath = 'hdfs:/user/bm106/pub/MSD/'
@@ -29,20 +29,11 @@ def main(spark, netID, fraction):
 	original = spark.read.parquet(inpath + 'cf_train_new.parquet')
 
 	# subsample 1%, 5%, 25% of the data
-	# for size, fraction in zip(['tiny','small','medium'], [0.01,0.05,0.25]):
-	fraction = float(fraction)
-
-	if fraction == 0.01:
-		size = 'tiny'
-	elif fraciton == 0.05:
-		size = 'small'
-	else:
-		size = 'medium'
-
-	sample = original.sample(fraction)
-	sample.collect()
-	sample_outname = f'cf_train_{size}.parquet'
-	sample.write.parquet(outpath+sample_outname)
+	for size, fraction in zip(['tiny','small','medium'], [0.01,0.05,0.25]):
+		sample = original.sample(fraction)
+		sample.collect()
+		sample_outname = f'cf_train_{size}.parquet'
+		sample.write.parquet(outpath+sample_outname)
 
 	# TODO: sample training, validation and test files by user_id
 
@@ -60,7 +51,8 @@ if __name__ == "__main__":
 	spark = SparkSession.builder.appName('subsample').config('spark.blacklist.enabled',False).getOrCreate()
 
 	# Get user netID from the command line
-	netID = getpass.getuser()
-	fraction = sys.argv[1]
+	# netID = getpass.getuser()
+	netID = 'tj810'
+	# fraction = 0.01
 	# Call our main routine
-	main(spark, netID, fraction)
+	main(spark, netID)
