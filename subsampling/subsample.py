@@ -31,7 +31,8 @@ def main(spark, netID, fraction):
 	# subsample data
 	sample = original.sample(fraction)
 	sample.collect()
-	sample_outname = f'cf_train_{str(round(fraction, 2)).split('.')[1]}.parquet'
+	save = str(round(fraction, 2)).split('.')[1]
+	sample_outname = f'cf_train_{save}.parquet'
 	sample.write.parquet(outpath+sample_outname)
 
 	# TODO: sample training, validation and test files by user_id
