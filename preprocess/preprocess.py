@@ -32,7 +32,7 @@ def main(spark, netID, fraction):
     indexed_df = pipeline.fit(original).transform(original)
     
     #change float index to int
-    indexed_df = indexed_df.selectExpr("cast(user_id_index as int) user_id_index", "cast(track_id_index as int) track_id_index").drop('user_id','track_id')
+    indexed_df = indexed_df.selectExpr("cast(user_id_index as int) user_id_index", "cast(count as int) count","cast(track_id_index as int) track_id_index")
     data_out_name = f'cf_train_{save}_indexed.parquet'
     #indexed_df.write.parquet(path + data_out_name)
     
