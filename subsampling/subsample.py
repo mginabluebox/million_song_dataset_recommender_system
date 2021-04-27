@@ -30,7 +30,7 @@ def main(spark, netID, fraction):
 
 	# subsample data
 	sample = original.sample(fraction)
-	sample.collect()
+	# sample.collect()
 	save = str(round(fraction, 2)).split('.')[1]
 	sample_outname = f'cf_train_{save}.parquet'
 	sample.write.parquet(outpath+sample_outname)
