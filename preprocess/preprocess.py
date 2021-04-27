@@ -34,7 +34,7 @@ def main(spark, netID, fraction):
     #change float index to int
     indexed_df = indexed_df.selectExpr("cast(user_id_index as int) user_id_index", "cast(count as int) count","cast(track_id_index as int) track_id_index")
     data_out_name = f'cf_train_{save}_indexed.parquet'
-    #indexed_df.write.parquet(path + data_out_name)
+    indexed_df.write.parquet(path + data_out_name)
     
     #show schema to check
     indexed_df.printSchema()
