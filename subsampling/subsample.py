@@ -5,8 +5,8 @@ Usage:
     $ spark-submit lab_3_starter_code.py <student_netID>
 '''
 #Use getpass to obtain user netID
-import getpass
 import sys
+import argparse 
 
 # And pyspark.sql to get the spark session
 from pyspark.conf import SparkConf
@@ -14,7 +14,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 
 
-def main(spark, netID):
+def main(spark, netID, fraction):
 	# try:
 	# 	print(spark.conf.get('spark.executor.memory'))
 	# 	print(spark.conf.get('spark.driver.memory'))
@@ -28,12 +28,11 @@ def main(spark, netID):
 	# read training file
 	original = spark.read.parquet(inpath + 'cf_train_new.parquet')
 
-	# subsample 1%, 5%, 25% of the data
-	for size, fraction in zip(['tiny','small','medium'], [0.01,0.05,0.25]):
-		sample = original.sample(fraction)
-		sample.collect()
-		sample_outname = f'cf_train_{size}.parquet'
-		sample.write.parquet(outpath+sample_outname)
+	# subsample data
+	sample = original.sample(fraction)
+	sample.collect()
+	sample_outname = f'cf_train_{str(round(fraction, 2)).split('.')[1]}.parquet'
+	sample.write.parquet(outpath+sample_outname)
 
 	# TODO: sample training, validation and test files by user_id
 
@@ -47,12 +46,17 @@ if __name__ == "__main__":
 	# config = spark.sparkContext._conf.setAll(conf)
 	# spark.sparkContext.stop()
 
+	# Get user netID from the command line
+	parser = argparse.ArgumentParser(description='Subsample the training dataset.')
+	parser.add_argument('--netID',help='Enter your netID for constructing path to your HDFS.')
+	parser.add_argument('--fraction',type=float,help='Enter fraction of the dataset to subsample.')
+	args = parser.parse_args()
+
+	netID = args.netID
+	fraction = args.fraction
+
 	# Create the spark session object
 	spark = SparkSession.builder.appName('subsample').config('spark.blacklist.enabled',False).getOrCreate()
 
-	# Get user netID from the command line
-	# netID = getpass.getuser()
-	netID = 'tj810'
-	# fraction = 0.01
 	# Call our main routine
-	main(spark, netID)
+	main(spark, netID, fraction)
