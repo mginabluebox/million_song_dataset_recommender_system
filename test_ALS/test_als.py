@@ -5,6 +5,7 @@ Usage:
     $ spark-submit lab_3_starter_code.py <student_netID>
 '''
 #Use getpass to obtain user netID
+import os
 import sys
 import argparse 
 
@@ -74,11 +75,13 @@ def evaluate(targets, predictions, metrics):
     return scores
 
 def main(spark, netID, fraction):
+    sc = spark.sparkContext
 
     # specify path
     path = f'hdfs:/user/{netID}/final_project/subsample/'
     model_path = f'hdfs:/user/{netID}/final_project/model/'
     pred_path = f'hdfs:/user/{netID}/final_project/prediction/'
+    output_path = 'output/'
 
     # read training file
     if fraction:
@@ -107,9 +110,11 @@ def main(spark, netID, fraction):
             if save:
                 model_name = f'MFImp_frac{save}_r{rank}_reg{regParam}'
                 pred_name = f'Pred_frac{save}_r{rank}_reg{regParam}.parquet'
+                output_name = f'Output_frac{save}_r{rank}_reg{regParam}.txt'
             else:
                 model_name = f'MFImp_r{rank}_reg{regParam}'
                 pred_name = f'Pred_r{rank}_reg{regParam}.parquet'
+                output_name = f'Output_r{rank}_reg{regParam}'
 
             model = train(training, rank=rank, regParam=regParam)
             #model.write().overwrite().save(model_path + model_name)
@@ -125,13 +130,15 @@ def main(spark, netID, fraction):
             #valid_predictions.write.parquet(pred_path + pred_name)
             
             # evluate by ranking metrics
-            metrics = ['MAP']
-            #           'AP@10', 'AP@20', 'AP@50', 'AP@100',
-            #           'NDCG@10', 'NDCG@20', 'NDCG@50', 'NDCG@100']
+            metrics = ['MAP',
+                       'AP@10', 'AP@20', 'AP@50', 'AP@100',
+                       'NDCG@10', 'NDCG@20', 'NDCG@50', 'NDCG@100']
             scores = evaluate(valid_targets, valid_predictions, metrics=metrics)
             score_str = ' '.join([metric+f'={score}'
                                   for metric, score in zip(metrics, scores)])
-            print(f'Validation: {score_str}')
+            
+            score_rdd = sc.parallelize([f'Validation: {score_str}\n'])
+            score_rdd.coalesce(1).saveAsTextFile(output_path + output_name)
 
 
 # Only enter this block if we're in main
