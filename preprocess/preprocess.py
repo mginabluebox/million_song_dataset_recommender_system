@@ -31,19 +31,21 @@ def preprocess_data(data_paths, data_out_paths):
                 stringOrderType='alphabetAsc')
                 for column in ['user_id','track_id'] ]
     pipeline = Pipeline(stages=indexers)
+    pipelineModel = pipeline.fit(original)
 
     for i in range(len(dfs)):
-        indexed_df = pipeline.fit(original).transform(dfs[i])
+        indexed_df = pipelineModel.transform(dfs[i])
 
         #change float index to int
         indexed_df = indexed_df.selectExpr("cast(user_id_index as int) user_id_index",
                                            "cast(count as int) count",
                                            "cast(track_id_index as int) track_id_index")
-
         indexed_df.write.parquet(data_out_paths[i])
 
         #show schema to check
         indexed_df.printSchema()
+
+    pipelineModel.write.overwrite().save(indexer_path + indexer_name)
 
 def main(spark, netID, fraction):
     out_path = f'hdfs:/user/{netID}/final_project/subsample/'
