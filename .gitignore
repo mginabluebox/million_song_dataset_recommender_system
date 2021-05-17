@@ -106,3 +106,6 @@ venv.bak/
 # large files
 feature_files/
 model_outputs/
+
+# env
+overlay-*
