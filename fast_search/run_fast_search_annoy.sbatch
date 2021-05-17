@@ -13,8 +13,7 @@
 
 module purge
 
-singularity exec --nv \
-        --overlay /scratch/tj810/final-project-team_unsupervised_learners/overlay-5GB-200K.ext3:ro \
+singularity exec --overlay /scratch/tj810/final-project-team_unsupervised_learners/overlay-5GB-200K.ext3:ro \
         /scratch/work/public/singularity/cuda11.0-cudnn8-devel-ubuntu18.04.sif \
         bash -c "source /ext3/env.sh;\
-                 python fast_search.py $SLURM_ARRAY_TASK_ID True;"
+                 python fast_search.py $SLURM_ARRAY_TASK_ID annoy;"

@@ -2,13 +2,17 @@ import numpy as np
 import pandas as pd
 from annoy import AnnoyIndex
 import sys
-from IPython import get_ipython
 import json
 import time
 from numpy.linalg import norm
 
 k = int(sys.argv[1])
-ann = bool(sys.argv[2])
+if sys.argv[2] == 'annoy':
+    ann = True
+    print('Annoy')
+else:
+    ann = False
+    print('Bruteforce')
 num_users = 5
 
 home_dir = '../model_outputs'
@@ -22,7 +26,7 @@ target_dir = f'{home_dir}/target_csv'
 user_factor_path = f'{model_dir}/userFactors.csv' 
 item_factor_path = f'{model_dir}/itemFactors.csv'
 target_path = f'{target_dir}/valid_targets.csv' # validation targets 
-output_dir = f'{home_dir}/time_outputs'
+output_dir = f'time_outputs'
 
 user_df = pd.read_csv(user_factor_path, converters={'features': eval}) # [id: Int, features: Array(Float)]
 item_df = pd.read_csv(item_factor_path, converters={'features': eval}) # [id: Int, features: Array(Float)]
@@ -82,6 +86,7 @@ if ann:
         start = time.process_time()
     ann_str = 'annoy'
 else:
+    print('Bruteforcing...')
     bf_rt = Retriever('bruteforce', rank, item_df)
     t = []
     start = time.process_time() 
