@@ -6,8 +6,8 @@ from IPython import get_ipython
 import json
 from numpy.linalg import norm
 
-k = int(sys.argv[0])
-ann = bool(sys.argv[1])
+k = int(sys.argv[1])
+ann = bool(sys.argv[2])
 num_users = 5
 
 home_dir = '../model_outputs'
