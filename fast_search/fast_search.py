@@ -4,6 +4,7 @@ from annoy import AnnoyIndex
 import sys
 from IPython import get_ipython
 import json
+import time
 from numpy.linalg import norm
 
 k = int(sys.argv[1])
@@ -70,25 +71,33 @@ class Retriever:
 
 selected_users = {k:user_features[k] for k in list(user_features.keys())[:num_users]}
 
+n_loops = 7
 if ann:
     annoy_rt = Retriever('annoy', rank, item_df)
-    out = get_ipython().run_line_magic("timeit","-o annoy_rt.query_all(selected_users, k={})".format(k))
+    t = []
+    start = time.process_time() 
+    for i in range(n_loops): 
+        annoy_rt.query_all(selected_users, k=k)
+        t.append(time.process_time() - start)
+        start = time.process_time()
     ann_str = 'annoy'
 else:
     bf_rt = Retriever('bruteforce', rank, item_df)
-    out = get_ipython().run_line_magic("timeit","-o bf_rt.query_all(selected_users, k={})".format(k))
+    t = []
+    start = time.process_time() 
+    for i in range(n_loops): 
+        bf_rt.query_all(selected_users, k=k)
+        t.append(time.process_time() - start)
+        start = time.process_time()
     ann_str = 'bruteforce'
 
 
-out_d = {'average':out.average,\
-    'stdev': out.stdev,\
-    'timings':out.timings,\
+out_d = {'average':sum(t)/n_loops,\
+    'timings':t,\
     'all_runs':out.all_runs,\
-    'best':out.best,\
-    'compile_time':out.compile_time,\
-    'loops':out.loops,\
-    'repeat':out.repeat,\
-    'worst':out.worst}
+    'best':min(t),\
+    'loops':n_loops,\
+    'worst':max(t)}
 
 with open(f'{output_dir}/{ann_str}_MFImp_a{alpha}r{rank}_reg{regParam}_it{maxIter}_k{k}.json', 'w') as fp:
     json.dump(out_d, fp)
