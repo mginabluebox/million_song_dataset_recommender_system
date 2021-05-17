@@ -26,7 +26,7 @@ target_dir = f'{home_dir}/target_csv'
 user_factor_path = f'{model_dir}/userFactors.csv' 
 item_factor_path = f'{model_dir}/itemFactors.csv'
 target_path = f'{target_dir}/valid_targets.csv' # validation targets 
-output_dir = f'time_outputs'
+output_dir = f'time_outputs_new'
 
 user_df = pd.read_csv(user_factor_path, converters={'features': eval}) # [id: Int, features: Array(Float)]
 item_df = pd.read_csv(item_factor_path, converters={'features': eval}) # [id: Int, features: Array(Float)]
@@ -75,7 +75,7 @@ class Retriever:
 
 selected_users = {k:user_features[k] for k in list(user_features.keys())[:num_users]}
 
-n_loops = 7
+n_loops = 10
 if ann:
     annoy_rt = Retriever('annoy', rank, item_df)
     t = []
@@ -86,7 +86,6 @@ if ann:
         start = time.process_time()
     ann_str = 'annoy'
 else:
-    print('Bruteforcing...')
     bf_rt = Retriever('bruteforce', rank, item_df)
     t = []
     start = time.process_time() 

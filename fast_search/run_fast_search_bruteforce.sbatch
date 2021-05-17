@@ -3,14 +3,13 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=1
-#SBATCH --time=10:00:00
-#SBATCH --mem=128GB
+#SBATCH --time=2:00:00
+#SBATCH --mem=32GB
 #SBATCH --array=1,50-500:50
 #SBATCH --mail-type=BEGIN,FAIL,END
 #SBATCH --mail-user=tj810@nyu.edu
 #SBATCH --job-name=fast_search_bruteforce
 #SBATCH --output=slurm_output/slurm_%A_%a.out
-#SBATCH --error=slurm_output/slurm_%A_%a.err
 
 module purge
 
