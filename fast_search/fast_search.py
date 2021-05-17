@@ -94,7 +94,6 @@ else:
 
 out_d = {'average':sum(t)/n_loops,\
     'timings':t,\
-    'all_runs':out.all_runs,\
     'best':min(t),\
     'loops':n_loops,\
     'worst':max(t)}
