@@ -19,7 +19,7 @@
         └── test_als.py                              # python code for testing ALS model
     ├── output                                       # validation MAP/NDCG outputs
     ├── exploration
-        └── exploration.ipynb
+        └── exploration.ipynb			# python code for exploration 
     ├── fast_search
         ├── fast_search.ipynb                        # jupyter notebook for testing annoy and scann packages & implmenting brute-force method
         ├── fast_search.py                           # python version for submitting jobs on Greene
@@ -31,6 +31,8 @@
         ├── make_feature_dataframe.ipynb             # feature extraction and aggregation
         ├── modeling.ipynb                           # feature engineering and multioutput regression modeling
         └── best_model_weights                       # weights for all 200 ridge regressors used in multioutput regression
+    └── project_report
+        ├── 1004_final_report.pdf             # final project report
 
 # Overview
 
