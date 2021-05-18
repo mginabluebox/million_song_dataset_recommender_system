@@ -9,19 +9,19 @@
 ## Folder Structure
     .
     ├── subsampling
-        └── subsample.py                            # python code for subsampling the training dataset
+        └── subsample.py                             # python code for subsampling the training dataset
     ├── preprocess
-        ├── preprocess.py
-        └── preprocess_logcount.py
+        ├── preprocess.py                            # python code for converting the ids from String to Integer
+        └── preprocess_logcount.py                   # python code for converting the ids from String to Integer with logarithmic smoothed count
     ├── run_ALS
-        └── run.py
+        └── run.py                                   # python code for running MF-Implicit ALS model hyper-parameter tuning
     ├── test_ALS 
-        └── test_als.py                 
-    ├── output
+        └── test_als.py                              # python code for testing ALS model
+    ├── output                                       # validation MAP/NDCG outputs
     ├── exploration
         └── exploration.ipynb
     ├── fast_search
-        ├── fast_search.ipynb
+        ├── fast_search.ipynb                        # jupyter notebook for testing annoy and scann packages & implmenting brute-force method
         ├── fast_search.py                           # python version for submitting jobs on Greene
         ├── plot.ipynb                               # plot annoy, scann and bruteforce results 
         ├── run_fast_search_*.sbatch                 # sbatch files for submitting jobs on Greene
