@@ -6,6 +6,31 @@
 
 *Submission deadline*: 2021-05-18
 
+## Folder Structure
+    .
+    ├── subsampling
+        └── subsample.py                            # python code for subsampling the training dataset
+    ├── preprocess
+        ├── preprocess.py
+        └── preprocess_logcount.py
+    ├── run_ALS
+        └── run.py
+    ├── test_ALS 
+        └── test_als.py                 
+    ├── output
+    ├── exploration
+        └── exploration.ipynb
+    ├── fast_search
+        ├── fast_search.ipynb
+        ├── fast_search.py                           # python version for submitting jobs on Greene
+        ├── plot.ipynb                               # plot annoy, scann and bruteforce results 
+        ├── run_fast_search_*.sbatch                 # sbatch files for submitting jobs on Greene
+        ├── slurm_output                             # slurm stdout
+        └── time_outputs_scann                       # process time in json format (time_outputs_old & time_outputs_new contain older results)
+    └── cold_start 
+        ├── make_feature_dataframe.ipynb             # feature extraction and aggregation
+        ├── modeling.ipynb                           # feature engineering and multioutput regression modeling
+        └── best_model_weights                       # weights for all 200 ridge regressors used in multioutput regression
 
 # Overview
 
