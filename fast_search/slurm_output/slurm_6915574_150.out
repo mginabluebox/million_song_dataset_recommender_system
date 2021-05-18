@@ -1,0 +1,3 @@
+2021-05-17 21:14:26.960130: I tensorflow/stream_executor/platform/default/dso_loader.cc:49] Successfully opened dynamic library libcudart.so.11.0
+2021-05-17 21:23:34.493809: I scann/partitioning/partitioner_factory_base.cc:71] Size of sampled dataset for training partition: 249247
+2021-05-17 21:24:27.729456: I ./scann/partitioning/kmeans_tree_partitioner_utils.h:102] PartitionerFactory ran in 53.234954297s.
