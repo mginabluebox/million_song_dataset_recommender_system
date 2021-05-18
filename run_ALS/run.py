@@ -24,18 +24,21 @@ config = {
         'ranks': [10, 40, 100, 200],
         'regParams': [0.01, 0.1, 1],
         'alphas': [1, 40],
-        'maxIters': [20],
+        'maxIters': [10],
     },
     'logcount': {
         'k': 500,
         'ranks': [10, 40, 100, 200],
         'regParams': [0.01, 0.1, 1],
         'alphas': [1, 40],
-        'maxIters': [20]
+        'maxIters': [10]
     }
 }
 
-def train(training, rank, regParam, maxIter=10, alpha=1):
+def train(training, rank, regParam, maxIter, alpha):
+    """
+    Train ML-Implicit model
+    """
     als = ALS(rank=rank, regParam=regParam,
               implicitPrefs=True,
               maxIter=maxIter,
@@ -47,6 +50,9 @@ def train(training, rank, regParam, maxIter=10, alpha=1):
     return model 
 
 def predict(test_users, model, k):
+    """
+    Recommend top k items for test users
+    """
     user_predictions = model.recommendForUserSubset(test_users, k)
     # Output format:  number of users x k (100000 x 500)
     # user_id  | recommendations
@@ -67,6 +73,9 @@ def predict(test_users, model, k):
     return user_predictions
 
 def evaluate(targets, predictions, metrics):
+    """
+    Evaluate by ranking metrics
+    """
     # Rankingmetrics
     # RDD[([pred_item_id1, pred_item_id2, ....], [target_item_id1, target_item_id2, ....])]
     pred_and_targets = predictions.join(targets,
@@ -89,41 +98,46 @@ def evaluate(targets, predictions, metrics):
     return scores
 
 def compute_scores(targets, model, k, metrics):
+    """
+    Evaluate by ranking metrics given the model and k
+    """
     users = targets.select('user_id_index')
     predictions = predict(users, model, k)
-
-    # evluate by ranking metrics
     scores = evaluate(targets, predictions, metrics=metrics)
     return scores
 
 def main(spark, netID, fraction):
     sc = spark.sparkContext
 
-    data_dir = f'hdfs:/user/{netID}/final_project/subsample/'
-    model_dir = f'hdfs:/user/{netID}/final_project/model/'
-    pred_dir = f'hdfs:/user/{netID}/final_project/prediction/'
-    output_dir = f'hdfs:/user/{netID}/final_project/output/'
+    home_dir = f'hdfs:/user/{netID}/final_project'
+    data_dir = f'{home_dir}/subsample'
+    model_dir = f'{home_dir}/model'
+    output_dir = f'{home_dir}/output'
 
     for data_name, cfg in config.items():
         data_sfx = '' if data_name == '' else '_' + data_name
         frac_sfx = '' if not fraction else '_' + str(round(fraction, 2)).split('.')[1]
 
-        if fraction:
+        # Use subsampled data
+        if fraction: 
             data_name = f'cf_train{frac_sfx}_indexed.parquet'
             original = spark.read.parquet(data_dir + data_name).dropna()
             (training, valid), test = original.randomSplit([0.8, 0.2]), None
+        # Use full data
         else:
             train_data_name = f'cf_train_indexed{data_sfx}.parquet'
             valid_data_name = f'cf_validation_indexed{data_sfx}.parquet'
             test_data_name = f'cf_test_indexed{data_sfx}.parquet'
-            training = spark.read.parquet(data_dir + train_data_name).dropna()
-            valid = spark.read.parquet(data_dir + valid_data_name).dropna()
-            #test = spark.read.parquet(data_dir + test_data_name).dropna()
+            training = spark.read.parquet(f'{data_dir}/{train_data_name}').dropna()
+            valid = spark.read.parquet(f'{data_dir}/{valid_data_name}').dropna()
+            test = spark.read.parquet(f'{data_dir}/{test_data_name}').dropna()
         
         valid_targets = valid.groupBy('user_id_index')\
             .agg(F.collect_set('track_id_index')
                   .alias('tgt_track_id_indices')).cache()
-
+        #test_targets = test.groupBy('user_id_index')\
+        #    .agg(F.collect_set('track_id_index')
+        #          .alias('tgt_track_id_indices'))
         for alpha in cfg['alphas']: 
             for rank in cfg['ranks']:
                 for regParam in cfg['regParams']:
@@ -131,30 +145,31 @@ def main(spark, netID, fraction):
                         param_name = f'a{alpha}r{rank}_reg{regParam}_it{maxIter}'
                         cfg_name = f'{data_sfx}{frac_sfx}_{param_name}'
                         model_name = f'MFImp{cfg_name}'
-                        model = train(training, rank=rank, regParam=regParam)
 
-                        metrics = ['MAP', 'NDCG@100', 'NDCG@500']
+                        # Train model
+                        model = train(training, rank=rank, regParam=regParam, alpha=alpha, maxIter=maxIter)
+
+                        # Evaluate model
+                        metrics = ['MAP', 'NDCG@500']
                         valid_scores = compute_scores(valid_targets, model, cfg['k'], metrics)
-                        #test_scores = compute_scores(test, model, cfg['k'], metrics)
-                        
+                        #test_scores = compute_scores(test_targets, model, cfg['k'], metrics)
+
+                        # Output & Save result
                         valid_score_str = 'Validation: ' + \
                             ' '.join([metric+f'={score}' for metric, score in zip(metrics, valid_scores)])
-                        #test_score_str = 'Test: ' + \
-                        #    ' '.join([metric+f'={score}' for metric, score in zip(metrics, valid_scores)])
                         print(valid_score_str)
+                        #test_score_str = 'Test: ' + \
+                        #    ' '.join([metric+f'={score}' for metric, score in zip(metrics, test_scores)])
                         #print(test_score_str)
-
-                        #score_rdd = sc.parallelize([score_str + '\n' for score_str in [valid_score_str, test_score_str]])
+                        
                         score_rdd = sc.parallelize([valid_score_str + '\n'])
-                        score_rdd.coalesce(1).saveAsTextFile(output_dir + model_name)
-                        model.write().overwrite().save(model_dir + model_name)
+                        score_rdd.coalesce(1).saveAsTextFile(f'{output_dir}/{model_name}')
+
+                        # Save model
+                        model.write().overwrite().save(f'{model_dir}/{model_name}')
 
 # Only enter this block if we're in main
 if __name__ == "__main__":
-    # change default spark context config
-    # conf = [('spark.executor.memory', '10g'), ('spark.driver.memory', '10g')]
-    # config = spark.sparkContext._conf.setAll(conf)
-    # spark.sparkContext.stop()
 
     # Get user netID from the command line
     parser = argparse.ArgumentParser(description='Test ALS model.')
